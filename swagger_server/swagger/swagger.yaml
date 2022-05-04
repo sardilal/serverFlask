@@ -1,0 +1,247 @@
+openapi: 3.0.0
+info:
+  title: API Cafe
+  description: API para cafe. Prueba semillero Devco
+  version: 1.0.0
+servers:
+- url: https://api.server.test/v1
+tags:
+- name: Barista
+  description: Administra Combos y productos
+- name: Cliente
+  description: Solicita pedidos
+- name: Admins
+  description: Administra todo
+paths:
+  /pedido:
+    get:
+      tags:
+      - Barista
+      - Admins
+      summary: Obtiene los pedidos
+      description: Obtiene los pedidos
+      operationId: obtener_pedido
+      parameters:
+      - name: idPedido
+        in: query
+        description: Pasa el id del Pedido
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Pedido'
+                x-content-type: application/json
+        "400":
+          description: Parametros de busqueda incorrectos
+      x-openapi-router-controller: swagger_server.controllers.barista_controller
+    post:
+      tags:
+      - Admins
+      summary: Crea un pedido
+      description: Crea un pedido
+      operationId: crear_pedido
+      requestBody:
+        description: Pedido para agregar
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Pedido'
+      responses:
+        "201":
+          description: Pedido Creado
+        "400":
+          description: Objeto invalido
+        "409":
+          description: El pedido ya existe
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /producto/{idProducto}/:
+    get:
+      tags:
+      - Barista
+      - Cliente
+      - Admins
+      summary: Obtiene los productos
+      description: Obtiene los productos
+      operationId: obtener_producto
+      parameters:
+      - name: idProducto
+        in: path
+        description: Pasa el id del Producto
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Producto'
+                x-content-type: application/json
+        "400":
+          description: Parametros de busqueda incorrectos
+      x-openapi-router-controller: swagger_server.controllers.barista_controller
+    put:
+      tags:
+      - Admins
+      - Barista
+      summary: Reemplaza el producto
+      description: Reemplazar el producto
+      operationId: reemplazar_producto
+      parameters:
+      - name: idProducto
+        in: path
+        description: Pasa el id del Producto
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Pedido para agregar
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Producto'
+      responses:
+        "201":
+          description: Producto reemplazado
+        "400":
+          description: Objeto Invalido
+        "409":
+          description: El producto ya existe
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+  /cuenta/{idCuenta}/:
+    get:
+      tags:
+      - Admins
+      - Barista
+      - Cliente
+      summary: Obtiene la cuenta
+      description: Obtiene la cuenta
+      operationId: obtener_cuenta
+      parameters:
+      - name: idCuenta
+        in: path
+        description: Pasa el id de la cuenta
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cuenta'
+                x-content-type: application/json
+        "400":
+          description: Parametros de busqueda incorrectos
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+    post:
+      tags:
+      - Admins
+      - Barista
+      summary: Crea una cuenta
+      description: Crea una cuenta
+      operationId: crear_cuenta
+      parameters:
+      - name: idCuenta
+        in: path
+        description: Pasa el id de la cuenta
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: Cuenta para agregar
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Cuenta'
+      responses:
+        "201":
+          description: Cuenta creada
+        "400":
+          description: Objeto invalido
+        "409":
+          description: La cuenta ya existe
+      x-openapi-router-controller: swagger_server.controllers.admins_controller
+components:
+  schemas:
+    Pedido:
+      required:
+      - idPedido
+      - nombre
+      - usuario
+      type: object
+      properties:
+        idPedido:
+          type: string
+          example: p100
+        nombre:
+          type: string
+          example: Pedido especial
+        usuario:
+          type: string
+          example: user1
+      example:
+        usuario: user1
+        idPedido: p100
+        nombre: Pedido especial
+    Producto:
+      required:
+      - idProducto
+      - precio
+      type: object
+      properties:
+        idProducto:
+          type: string
+          example: pastel
+        precio:
+          type: integer
+          example: 2000
+      example:
+        precio: 2000
+        idProducto: pastel
+    Cuenta:
+      required:
+      - idCuenta
+      - idPedido
+      - valor
+      type: object
+      properties:
+        idCuenta:
+          type: string
+          example: cu100
+        valor:
+          type: integer
+          example: 10000
+        idPedido:
+          $ref: '#/components/schemas/Pedido'
+      example:
+        valor: 10000
+        idCuenta: cu100
+        idPedido:
+          usuario: user1
+          idPedido: p100
+          nombre: Pedido especial
+
